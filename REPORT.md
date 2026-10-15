@@ -79,7 +79,22 @@ PercMLP cũng dao động 0,659–2,255%; seed xấu có CI95 [1,773%; 2,863%], 
 ## Câu 6 · Tác nhân phản ứng
 Dán bảng "xe sau phát lại" và "xe sau phản ứng". `T` bạn hiệu chỉnh là bao nhiêu, xe sau chân thực đến mức nào so với xe không phản ứng? Vì sao IDM bị tính "va chạm giả" khi xe sau chỉ phát lại, và điều này làm đổi kết luận về bộ điều khiển ra sao?
 
-(trả lời ở đây)
+Bằng chứng: `evidence/agents.json`. Hiệu chỉnh trên 3.000 quỹ đạo **train**, chọn T=1,4 s trong 8 giá trị thử; W1 giữa phân bố time-headway mô phỏng và người lái là **0,3470 s**, so với **0,8612 s** của xe không phản ứng. Trung vị headway người lái 1,8770 s. W1 giảm khoảng 59,7%, nhưng chỉ khớp một phân bố tổng hợp trên train, chưa xác nhận độ chân thực của mọi hành vi. Xe sau bắt đầu cách 16 m và có trễ phản ứng 0,6 s.
+
+| Trễ ego (s) | Bộ điều khiển | Có va chạm, xe sau phát lại (%) | Có va chạm, xe sau phản ứng (%) | Va chạm phía sau: phát lại / phản ứng (%) |
+|---|---|---:|---:|---:|
+| 0.0 | const-vel | 73.370 | 73.370 | 0.000 / 0.000 |
+| 0.0 | IDM | 69.556 | 0.963 | 68.593 / 0.000 |
+| 0.0 | EgoMLP | 71.259 | 71.259 | 0.000 / 0.000 |
+| 0.0 | PercMLP | 92.222 | 8.370 | 85.111 / 0.000 |
+| 0.6 | const-vel | 73.370 | 73.370 | 0.000 / 0.000 |
+| 0.6 | IDM | 70.074 | 5.148 | 64.926 / 0.000 |
+| 0.6 | EgoMLP | 71.704 | 71.704 | 0.000 / 0.000 |
+| 0.6 | PercMLP | 73.667 | 17.148 | 56.889 / 0.000 |
+
+Các tỷ lệ là phần lưới 2.700 ô, không phải tỷ lệ tai nạn ngoài đời. Với mô hình học, script lấy trường hợp xấu nhất qua 5 seed **riêng cho mỗi chế độ xe sau**; hai cột có thể thuộc hai seed khác nhau. Khi va chạm phía sau xảy ra trước, rollout dừng ô đó nên cũng không suy ra va chạm phía trước của cùng ô ở thời điểm sau.
+
+Ở trễ ego 0,6 s, IDM có 64,926% ô va chạm phía sau khi xe sau giữ nguyên tốc độ, còn xe sau phản ứng là 0%; tổng va chạm từ 70,074% còn 5,148%. Replay không đáp lại việc ego phanh nên tạo va chạm do thế giới mô phỏng không thích ứng ("va chạm giả" khi dùng để suy kết luận về ego); không có nghĩa va chạm phía sau thật là bất khả thi. PercMLP giảm từ 73,667% xuống 17,148%, nhưng vẫn kém IDM; không thể dùng kết quả replay để kết luận rằng phanh tránh xe trước là chính sách nguy hiểm. Cần kiểm tra thêm xe sau mất tập trung, trễ dài hơn và phân bố hành vi đa dạng trước khi suy rộng.
 
 ## Câu 7 · Cổng phát hành và sửa
 Quy tắc nào chặn PercMLP và nguyên nhân gốc là gì (dẫn số)? Bạn sửa bằng gì và vì sao nó chữa đúng nguyên nhân? Sau khi qua cổng, PercMLP+ có **tốt hơn** IDM không? Nó có nên được phát hành không, và bạn đề xuất làm gì trước khi quyết định?
@@ -105,4 +120,7 @@ Stage 2 hoàn tất: triển khai đủ 10 thân hàm TODO, không thay test, si
 Stage 3 hoàn tất: chạy chính thức `run_all.py --student-id 2A202602763 replay scenarios` (không quick), lưu replay 600 đoạn, lưới 2.700 ô, 614 ca phanh và hình minh họa. Kiểm tra thêm đoạn AEB 79 bằng chính IDMStream. Training và các bước sau được ghi nhận riêng theo tiến độ dưới đây.
 
 
-Stage 4 hoàn tất: chạy `run_all.py --student-id 2A202602763 --seeds 5 openloop closedloop`, không quick, CPU với OPENBLAS_NUM_THREADS=OMP_NUM_THREADS=1. Train đủ 15 epoch/mô hình/seed theo bộ khung (10 mô hình), khoảng 164 s huấn luyện và 192 s toàn bước. Lưu 10 checkpoint tại work/models/ (ignored), evidence vòng hở/vòng kín và hình đối chiếu. Chưa chạy tác nhân phản ứng, gate hoặc sửa PercMLP+.
+Stage 4 hoàn tất: chạy `run_all.py --student-id 2A202602763 --seeds 5 openloop closedloop`, không quick, CPU với OPENBLAS_NUM_THREADS=OMP_NUM_THREADS=1. Train đủ 15 epoch/mô hình/seed theo bộ khung (10 mô hình), khoảng 164 s huấn luyện và 192 s toàn bước. Lưu 10 checkpoint tại work/models/ (ignored), evidence vòng hở/vòng kín và hình đối chiếu. Tác nhân phản ứng được ghi nhận ở stage 5; chưa chạy gate hoặc sửa PercMLP+.
+
+
+Stage 5 hoàn tất: chạy `run_all.py --student-id 2A202602763 --seeds 5 agents`, không quick, CPU, thời gian khoảng 21 s. Hiệu chỉnh xe sau chỉ bằng train, đánh giá cả trễ ego 0 và 0,6 s với 5 seed mô hình đã lưu; ghi evidence/agents.json và câu 6. Chưa chạy Stage 6 (gate, augmentation và DAgger).

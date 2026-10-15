@@ -16,11 +16,11 @@
 
 | Bộ điều khiển | L2 vòng hở (m) | Va chạm vòng kín trên log (%) | Quyết định cổng |
 |---|---|---|---|
-| constant-velocity | 1.2647 | 20.812 | Chưa chạy gate |
+| constant-velocity | 1.2647 | 20.812 | BLOCK |
 | IDM | 1.5365 | 0.104 | (baseline) |
-| EgoMLP | 0.7671–0.7783 | 10.891–26.639 | Chưa chạy gate |
-| PercMLP | 0.6157–0.6278 | 0.659–2.255 | Chưa chạy gate |
-| PercMLP+ (sau khi sửa) | Chưa chạy | Chưa chạy | Chưa chạy |
+| EgoMLP | 0.7671–0.7783 | 10.891–26.639 | BLOCK |
+| PercMLP | 0.6157–0.6278 | 0.659–2.255 | BLOCK |
+| PercMLP+ (sau khi sửa) | 0.7914–0.8237 | 0.208–0.382 | RELEASE (7/7 quy tắc lab) |
 
 ## Câu 1 · Dữ liệu
 Bước 0 bạn phát hiện những vấn đề gì ở dữ liệu? Vì sao không dùng cột `Acc_LV`, và bạn thay bằng gì? Bao nhiêu quỹ đạo bị loại vì trùng, và vì sao chia theo quỹ đạo?
@@ -99,7 +99,22 @@ Các tỷ lệ là phần lưới 2.700 ô, không phải tỷ lệ tai nạn ng
 ## Câu 7 · Cổng phát hành và sửa
 Quy tắc nào chặn PercMLP và nguyên nhân gốc là gì (dẫn số)? Bạn sửa bằng gì và vì sao nó chữa đúng nguyên nhân? Sau khi qua cổng, PercMLP+ có **tốt hơn** IDM không? Nó có nên được phát hành không, và bạn đề xuất làm gì trước khi quyết định?
 
-(trả lời ở đây)
+`evidence/gate.json`: PercMLP bị chặn **R2–R6**, chỉ qua R1 và R7. Cận trên va chạm log 2,863% > ngưỡng 1,104%; cận trên lát cắt phanh 8,939% > 6,075%; diện tích cut-in có thể tránh nhưng vẫn đâm 12% > 2%; dải seed rộng 1,596 điểm phần trăm > 1; thế giới phản ứng 17,148% > 7,148%. Log thường không phủ đủ cut-in khó và học bắt chước chỉ ở trạng thái người đã đi qua không dạy mô hình phục hồi từ sai lệch của chính nó.
+
+Giữ nguyên ngưỡng gate và training loop: thêm **20.000 cảnh cut-in** sinh 197.360 cửa sổ expert-IDM vào 167.376 cửa sổ log train, rồi **2 vòng DAgger/seed**. DAgger cho mô hình tự lái trên train và gán nhãn IDM tại trạng thái nó ghé thăm; tập cuối khoảng 894–896 nghìn cửa sổ/seed. Đây là cách xử lý thiếu coverage và lệch phân bố trạng thái; chưa có ablation riêng để định lượng đóng góp của từng thành phần.
+
+| Chỉ số | PercMLP | PercMLP+ |
+|---|---:|---:|
+| L2 trung bình (m) | 0,6213 | 0,8078 |
+| Va chạm log min–max seed (%) | 0,659–2,255 | 0,208–0,382 |
+| Cận trên CI95 log, seed xấu (%) | 2,863 | 0,682 |
+| Cut-in tránh được nhưng đâm, trễ 0,6 s, seed xấu (%) | 12,000 | 0,259 |
+| Có va chạm trong thế giới phản ứng, trễ 0,6 s, seed xấu (%) | 17,148 | 5,407 |
+| Quyết định gate | BLOCK | RELEASE, 7/7 |
+
+PercMLP+ qua R2 vì 0,682% ≤ 1,104%, R3 vì 3,835% ≤ 6,075%, R4 vì 0,259% ≤ 2%, R5 vì dải seed 0,173 điểm phần trăm ≤ 1, R6 vì 5,407% ≤ 7,148%; R1 và R7 vẫn đạt. L2 tăng trong khi lái tốt hơn: mục tiêu giống người trên log không đồng nhất với mục tiêu tránh va chạm. Dải L2 bản sửa được tính lại từ checkpoint và lưu riêng `evidence/fix_openloop_per_seed.json` vì script chính chỉ lưu trung bình/độ lệch chuẩn cho bản sửa.
+
+Qua gate **không chứng minh tốt hơn IDM**: IDM chỉ 0,104% va chạm log và 0% vùng cut-in có thể tránh nhưng vẫn đâm; bản sửa vẫn kém ở các số này. Ở thử nghiệm cruise 20 m/s (`evidence/fix.json`), PercMLP+ còn 0,037–2,000% vùng tránh được nhưng đâm qua seed, so với PercMLP 26,407–54,222% và IDM 0%. Tốc độ 20 nằm ngoài miền 4–16 m/s của augmentation, không phải tuyên bố toàn bộ dữ liệu log đều dưới 16. Vì vậy chỉ chấp nhận quyết định RELEASE theo cổng của lab; chưa đề xuất phát hành ngoài đời. Cần test độc lập sau sửa, mô hình xe sau đa dạng, perception/độ trễ thực tế và mô phỏng 2D trước khi quyết định.
 
 ## Câu 8 · Bài lab này không chứng minh được gì
 Chọn **ít nhất ba** giới hạn quan trọng nhất đối với việc quyết định phát hành và giải thích vì sao mỗi cái làm kết luận của bạn kém chắc chắn. Điều gì cần làm tiếp để thu hẹp khoảng cách đến thế giới thật?
@@ -120,7 +135,10 @@ Stage 2 hoàn tất: triển khai đủ 10 thân hàm TODO, không thay test, si
 Stage 3 hoàn tất: chạy chính thức `run_all.py --student-id 2A202602763 replay scenarios` (không quick), lưu replay 600 đoạn, lưới 2.700 ô, 614 ca phanh và hình minh họa. Kiểm tra thêm đoạn AEB 79 bằng chính IDMStream. Training và các bước sau được ghi nhận riêng theo tiến độ dưới đây.
 
 
-Stage 4 hoàn tất: chạy `run_all.py --student-id 2A202602763 --seeds 5 openloop closedloop`, không quick, CPU với OPENBLAS_NUM_THREADS=OMP_NUM_THREADS=1. Train đủ 15 epoch/mô hình/seed theo bộ khung (10 mô hình), khoảng 164 s huấn luyện và 192 s toàn bước. Lưu 10 checkpoint tại work/models/ (ignored), evidence vòng hở/vòng kín và hình đối chiếu. Tác nhân phản ứng được ghi nhận ở stage 5; chưa chạy gate hoặc sửa PercMLP+.
+Stage 4 hoàn tất: chạy `run_all.py --student-id 2A202602763 --seeds 5 openloop closedloop`, không quick, CPU với OPENBLAS_NUM_THREADS=OMP_NUM_THREADS=1. Train đủ 15 epoch/mô hình/seed theo bộ khung (10 mô hình), khoảng 164 s huấn luyện và 192 s toàn bước. Lưu 10 checkpoint tại work/models/ (ignored), evidence vòng hở/vòng kín và hình đối chiếu. Tác nhân phản ứng được ghi nhận ở stage 5; gate và bản sửa được ghi nhận ở stage 6.
 
 
-Stage 5 hoàn tất: chạy `run_all.py --student-id 2A202602763 --seeds 5 agents`, không quick, CPU, thời gian khoảng 21 s. Hiệu chỉnh xe sau chỉ bằng train, đánh giá cả trễ ego 0 và 0,6 s với 5 seed mô hình đã lưu; ghi evidence/agents.json và câu 6. Chưa chạy Stage 6 (gate, augmentation và DAgger).
+Stage 5 hoàn tất: chạy `run_all.py --student-id 2A202602763 --seeds 5 agents`, không quick, CPU, thời gian khoảng 21 s. Hiệu chỉnh xe sau chỉ bằng train, đánh giá cả trễ ego 0 và 0,6 s với 5 seed mô hình đã lưu; ghi evidence/agents.json và câu 6. Stage 6 được ghi nhận dưới đây.
+
+
+Stage 6 hoàn tất: chạy `run_all.py --student-id 2A202602763 --seeds 5 gate fix`, không quick, CPU với BLAS/OMP 1 thread, khoảng **454 s**. Đủ 5 checkpoint percfix, mỗi seed train ban đầu và 2 vòng DAgger; không sửa gate hay evidence bằng tay. Lưu gate/fix chính thức, cập nhật openloop/closedloop/agents bằng script gốc, đánh giá thêm L2 từng seed từ checkpoint bằng Ctx.save. Còn Stage 7: hoàn thiện câu 8, chạy lại toàn pipeline theo yêu cầu nộp, trực quan hóa và kiểm tra submission.

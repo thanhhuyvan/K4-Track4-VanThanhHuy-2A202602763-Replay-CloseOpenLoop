@@ -1,0 +1,42 @@
+{
+  "student": {
+    "student_id": "2A202602763",
+    "split_seed": 6911,
+    "model_seed": 6377,
+    "v_ego": 10.0
+  },
+  "source": "Evaluation of saved percfix checkpoints on the same held-out windows; supplements official openloop summary",
+  "windows": 71757,
+  "per_seed": [
+    {
+      "seed": 6377,
+      "all": 0.8214080333709717,
+      "brake_slice": 0.9346036911010742,
+      "slice_share": 0.04710341848182059
+    },
+    {
+      "seed": 6378,
+      "all": 0.8103380799293518,
+      "brake_slice": 0.9388959407806396,
+      "slice_share": 0.04710341848182059
+    },
+    {
+      "seed": 6379,
+      "all": 0.7923804521560669,
+      "brake_slice": 0.966729998588562,
+      "slice_share": 0.04710341848182059
+    },
+    {
+      "seed": 6380,
+      "all": 0.8236652612686157,
+      "brake_slice": 0.9395843744277954,
+      "slice_share": 0.04710341848182059
+    },
+    {
+      "seed": 6381,
+      "all": 0.7913610339164734,
+      "brake_slice": 0.9296939969062805,
+      "slice_share": 0.04710341848182059
+    }
+  ]
+}

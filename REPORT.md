@@ -8,7 +8,7 @@
 | MSSV (đúng bằng `--student-id` bạn đã chạy) | `2A202602763` |
 | GitHub | [thanhhuyvan](https://github.com/thanhhuyvan/K4-Track4-VanThanhHuy-2A202602763-Replay-CloseOpenLoop) |
 | Seed chia dữ liệu / seed mô hình (xem `evidence/closedloop.json`, mục `student`) | split=6911; model=6377, 6378, 6379, 6380, 6381 |
-| Số seed huấn luyện bạn dùng (`--seeds`) | 5 (cấu hình dự kiến; chưa training ở stage 1) |
+| Số seed huấn luyện bạn dùng (`--seeds`) | 5 (đã train EgoMLP và PercMLP, seed 6377–6381) |
 
 ## Kết quả cuối
 
@@ -16,11 +16,11 @@
 
 | Bộ điều khiển | L2 vòng hở (m) | Va chạm vòng kín trên log (%) | Quyết định cổng |
 |---|---|---|---|
-| constant-velocity | | | |
-| IDM | | | (baseline) |
-| EgoMLP | | | |
-| PercMLP | | | |
-| PercMLP+ (sau khi sửa) | | | |
+| constant-velocity | 1.2647 | 20.812 | Chưa chạy gate |
+| IDM | 1.5365 | 0.104 | (baseline) |
+| EgoMLP | 0.7671–0.7783 | 10.891–26.639 | Chưa chạy gate |
+| PercMLP | 0.6157–0.6278 | 0.659–2.255 | Chưa chạy gate |
+| PercMLP+ (sau khi sửa) | Chưa chạy | Chưa chạy | Chưa chạy |
 
 ## Câu 1 · Dữ liệu
 Bước 0 bạn phát hiện những vấn đề gì ở dữ liệu? Vì sao không dùng cột `Acc_LV`, và bạn thay bằng gì? Bao nhiêu quỹ đạo bị loại vì trùng, và vì sao chia theo quỹ đạo?
@@ -52,12 +52,29 @@ Log khai thác được **614 ca phanh / 9.610 quỹ đạo (6,3892%)**, tập t
 ## Câu 4 · Vòng hở và vòng kín
 Dán bảng L2 và tỷ lệ va chạm của bốn bộ điều khiển (kèm hạng ở mỗi cách chấm). Cặp nào đổi thứ tự? Vì sao IDM có L2 như vậy mà vẫn lái tốt? Vì sao EgoMLP có L2 tốt hơn constant-velocity mà vẫn đâm?
 
-(trả lời ở đây)
+Bằng chứng: `evidence/openloop.json` và `evidence/closedloop.json`; train 167.376 cửa sổ, test 71.757 cửa sổ từ 2.883 quỹ đạo held-out. L2 là trung bình sai số vị trí tại 1/2/3 s. Bảng dưới dùng **trung bình qua seed để xếp hạng**; bảng kết quả đầu báo cáo giữ dải min–max, và gate sau này dùng seed xấu nhất.
+
+| Bộ điều khiển | L2 trung bình (m) | Hạng vòng hở | Va chạm trung bình (%) | Hạng vòng kín |
+|---|---:|---:|---:|---:|
+| const-vel | 1.2647 | 3 | 20.812 | 4 |
+| IDM | 1.5365 | 4 | 0.104 | 1 |
+| EgoMLP | 0.7699 | 2 | 20.402 | 3 |
+| PercMLP | 0.6213 | 1 | 1.276 | 2 |
+
+IDM đảo thứ tự với cả constant-velocity, EgoMLP và PercMLP. L2 đo mức giống quỹ đạo người lái; IDM có thể giữ khoảng cách và phanh khác người nên L2 cao (1,5365 m), nhưng chỉ va chạm 3/2.883 quỹ đạo (0,104%). EgoMLP dùng lịch sử tốc độ bản thân, không thấy gap/xe trước, nên dự đoán tốt trạng thái thường gặp nhưng không biết lúc nào cần phanh theo xe trước; sai số và trạng thái lệch khỏi log tích lũy khi tự điều khiển.
+
+Lát cắt xe trước sắp phanh chỉ chiếm 4,710% cửa sổ test: L2 của PercMLP tăng từ 0,6213 lên 0,8532 m, EgoMLP từ 0,7699 lên 1,0853 m. Trên lưới cut-in trễ 0,6 s, PercMLP vẫn đâm ở 12,0% ô có thể tránh được (seed xấu nhất), IDM 0%; có perception chưa đủ để bảo đảm an toàn ngoài phân bố log.
+
+![L2 vòng hở và tỷ lệ va chạm vòng kín, trung bình qua seed](evidence/openloop_vs_closedloop.png)
 
 ## Câu 5 · Một lần chạy chưa đủ
 EgoMLP dao động bao nhiêu giữa các seed? Khoảng tin cậy Wilson nói gì? Nếu bạn chỉ chạy đúng một seed thì có thể báo kết quả nào, và vì sao điều đó nguy hiểm?
 
-(trả lời ở đây)
+EgoMLP dao động **10,891–26,639%** va chạm qua seed 6377–6381, chênh **15,747 điểm phần trăm**, dù L2 chỉ 0,7671–0,7783 m. Nếu chỉ chọn seed 6378 có thể báo 314/2.883 = 10,891%; seed 6381 lại 768/2.883 = 26,639%. Chỉ báo seed tốt sẽ che khuất sự bất ổn của quá trình huấn luyện.
+
+Wilson CI95 của seed tốt là **[9,806%; 12,081%]**, seed xấu **[25,057%; 28,283%]**. Đây là khoảng bất định của tỷ lệ va chạm trên tập quỹ đạo tại một mô hình cố định theo giả thiết phép tính Wilson; không bao gồm toàn bộ biến thiên do seed, phụ thuộc giữa log hoặc sai lệch thế giới thật. Không gộp 5 lần chạy trên cùng test thành các mẫu độc lập.
+
+PercMLP cũng dao động 0,659–2,255%; seed xấu có CI95 [1,773%; 2,863%], còn IDM 0,104% với CI95 [0,035%; 0,306%]. Khi thêm nhiễu perception (gap std 1 m, lead speed std 0,5 m/s), PercMLP tăng thành 0,798–2,393%, IDM 0,139%. Cần xem đồng thời seed xấu nhất, CI, lát cắt khó và thử nghiệm dịch chuyển phân bố; chưa kết luận phát hành trước bước gate.
 
 ## Câu 6 · Tác nhân phản ứng
 Dán bảng "xe sau phát lại" và "xe sau phản ứng". `T` bạn hiệu chỉnh là bao nhiêu, xe sau chân thực đến mức nào so với xe không phản ứng? Vì sao IDM bị tính "va chạm giả" khi xe sau chỉ phát lại, và điều này làm đổi kết luận về bộ điều khiển ra sao?
@@ -85,4 +102,7 @@ Lệnh chạy từ thư mục repo: `D:\VIn\.venvs\day12\Scripts\python.exe -X u
 Stage 2 hoàn tất: triển khai đủ 10 thân hàm TODO, không thay test, simulator, training loop hoặc ngưỡng gate. `python -m unittest discover -s tests -v` đạt **25/25 tests**, gồm kiểm tra DAgger với nhãn expert, replay tolerance, biên vật lý và MLP. Đối chiếu AST với bộ khung xác nhận chỉ thân 10 hàm được phép thay đổi. Các phép thử bổ sung kiểm tra NaN lệch vị trí, lát cắt phanh rỗng và biên gate đều pass. Test MLP nhỏ ở stage 2 không phải kết quả training để nộp.
 
 
-Stage 3 hoàn tất: chạy chính thức `run_all.py --student-id 2A202602763 replay scenarios` (không quick), lưu replay 600 đoạn, lưới 2.700 ô, 614 ca phanh và hình minh họa. Kiểm tra thêm đoạn AEB 79 bằng chính IDMStream. Chưa chạy training 5 seed và các bước stage 4–6.
+Stage 3 hoàn tất: chạy chính thức `run_all.py --student-id 2A202602763 replay scenarios` (không quick), lưu replay 600 đoạn, lưới 2.700 ô, 614 ca phanh và hình minh họa. Kiểm tra thêm đoạn AEB 79 bằng chính IDMStream. Training và các bước sau được ghi nhận riêng theo tiến độ dưới đây.
+
+
+Stage 4 hoàn tất: chạy `run_all.py --student-id 2A202602763 --seeds 5 openloop closedloop`, không quick, CPU với OPENBLAS_NUM_THREADS=OMP_NUM_THREADS=1. Train đủ 15 epoch/mô hình/seed theo bộ khung (10 mô hình), khoảng 164 s huấn luyện và 192 s toàn bước. Lưu 10 checkpoint tại work/models/ (ignored), evidence vòng hở/vòng kín và hình đối chiếu. Chưa chạy tác nhân phản ứng, gate hoặc sửa PercMLP+.

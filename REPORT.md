@@ -1,6 +1,6 @@
 # REPORT — Lab Day 12
 
-> Điền **bằng lời và số liệu của chính bạn** (lấy từ màn hình và từ `evidence/*.json`). Mỗi câu 4–8 dòng là đủ. Số không có trong bằng chứng của bạn sẽ bị trừ điểm. Báo cáo công khai trên GitHub; giảng viên đối chiếu với `evidence/` và với bài của các bạn khác.
+> Báo cáo thực nghiệm CPU, MSSV `2A202602763`, 5 seed 6377–6381. Số liệu lấy từ evidence do các script của lab sinh; quyết định RELEASE chỉ có ý nghĩa trong bộ kiểm tra của bài lab.
 
 | | |
 |---|---|
@@ -8,11 +8,11 @@
 | MSSV (đúng bằng `--student-id` bạn đã chạy) | `2A202602763` |
 | GitHub | [thanhhuyvan](https://github.com/thanhhuyvan/K4-Track4-VanThanhHuy-2A202602763-Replay-CloseOpenLoop) |
 | Seed chia dữ liệu / seed mô hình (xem `evidence/closedloop.json`, mục `student`) | split=6911; model=6377, 6378, 6379, 6380, 6381 |
-| Số seed huấn luyện bạn dùng (`--seeds`) | 5 (đã train EgoMLP và PercMLP, seed 6377–6381) |
+| Số seed huấn luyện bạn dùng (`--seeds`) | 5 cho mỗi mô hình học (6377–6381) |
 
 ## Kết quả cuối
 
-Điền từ `evidence/closedloop.json`, `openloop.json`, `gate.json` (cho mỗi mô hình học, lấy **dải qua các seed**).
+Nguồn: `evidence/closedloop.json`, `openloop.json`, `gate.json`; L2 từng seed PercMLP+ trong `fix_openloop_per_seed.json`. Với mô hình học, bảng dùng **dải min–max qua 5 seed**; tỷ lệ trên log và tỷ lệ diện tích lưới là hai phép đo khác nhau.
 
 | Bộ điều khiển | L2 vòng hở (m) | Va chạm vòng kín trên log (%) | Quyết định cổng |
 |---|---|---|---|
@@ -119,14 +119,38 @@ Qua gate **không chứng minh tốt hơn IDM**: IDM chỉ 0,104% va chạm log 
 ## Câu 8 · Bài lab này không chứng minh được gì
 Chọn **ít nhất ba** giới hạn quan trọng nhất đối với việc quyết định phát hành và giải thích vì sao mỗi cái làm kết luận của bạn kém chắc chắn. Điều gì cần làm tiếp để thu hẹp khoảng cách đến thế giới thật?
 
-(trả lời ở đây)
+**Vật lý và quan sát giản lược:** mô phỏng dọc 1D, dt=0,1 s không có động học lái ngang, ma sát thay đổi, che khuất hay lỗi phát hiện từ ảnh. Kiểm tra biên phanh khớp ở lưới 2.700 ô chỉ xác nhận tính nhất quán nội bộ; cần thêm mô phỏng 2D/3D có cảm biến, sai số nhận thức và kiểm chứng động lực học.
 
+**Coverage và khả năng khái quát:** chỉ có 614 ca phanh trong 9.610 quỹ đạo; 5,222% ô cần phanh mạnh hơn ngưỡng người lái 3,6248 m/s². Phân bố log không đại diện mọi đường/tốc độ/thời tiết. Bản sửa còn 0,037–2,000% va chạm có thể tránh trên lưới 20 m/s. Cần dữ liệu độc lập theo địa điểm/thời gian, kịch bản biên ngoài họ cut-in đã train và đánh giá thêm tốc độ, tải xe, độ trễ.
+
+**Thế giới phản ứng chưa đủ chân thực:** xe sau dùng một IDM T=1,4 s và delay 0,6 s, hiệu chỉnh theo headway trên train (W1=0,3470 s). Khớp headway không bảo đảm khớp phân bố phản ứng khẩn cấp; cần hiệu chỉnh và kiểm định trên tập riêng với xe mất tập trung, tài xế đa dạng, mô hình tương tác khác và các mức trễ khác nhau.
+
+**Gate và thống kê chưa là chứng nhận phát hành:** biên cho phép R2 là baseline +1 điểm phần trăm, R4/R6 +2 điểm, nên qua gate không chứng minh tốt hơn IDM hay rủi ro đủ thấp ngoài đời. Wilson theo từng seed không bao hết phụ thuộc giữa quỹ đạo; test hiện tại đã được xem trước khi sửa nên không còn là kiểm định cuối hoàn toàn độc lập. Cần khóa chính sách, dùng test mới chưa xem, thống kê theo cụm/chuyến, thêm seed và ablation augmentation/DAgger. Kết quả hiện tại hỗ trợ học và so sánh trong lab, chưa đủ cơ sở triển khai xe thật.
+
+
+## Minh họa từ mô hình đã huấn luyện
+
+![So sánh L2, va chạm log kèm Wilson CI95 và lưới tốc độ 20 m/s qua các seed](evidence/final_comparison.png)
+
+Mỗi chấm là một seed mô hình học (IDM xác định chỉ có một điểm); thanh đứng ở biểu đồ giữa là Wilson CI95. L2 thấp nhất không đồng nghĩa ít va chạm nhất; PercMLP+ cải thiện vòng kín nhưng còn lỗi ở miền tốc độ mới.
+
+Viewer gốc nạp đủ **15 mô hình (3 loại × 5 seed)** và **24 log held-out**; `evidence/viz_capture.json` ghi cấu hình và kết quả hiển thị, không có page error. Với cut-in 14 m/s, gap 10 m, closing 11 m/s, xe sau phản ứng, seed 6377: PercMLP đâm phía trước ở 1,6 s; PercMLP+ không đâm, gap nhỏ nhất 1,9 m. Bảng so toàn bộ seed trong viewer vẫn ghi PercMLP+ đâm 1/5 seed ở cảnh này; không chọn một ảnh thành bằng chứng an toàn cho mọi seed. Đây là **vật lý 3D riêng**, không so trực tiếp tỷ lệ với simulator 1D.
+
+![PercMLP seed 6377 trong cảnh cut-in](evidence/viz_cutin_perc.png)
+
+![PercMLP+ cùng seed và cùng cảnh cut-in](evidence/viz_cutin_fixed.png)
+
+![PercMLP+ seed 6377 theo xe dẫn từ log 6191](evidence/viz_real_log.png)
+
+Log #6191 trong viewer: PercMLP+ seed 6377 không va chạm, gap nhỏ nhất 7,4 m. Ba ảnh chỉ là ví dụ; kết luận định lượng dựa vào toàn bộ evidence chính thức.
+
+Để xem trên local: chạy `D:\VIn\.venvs\day12\Scripts\python.exe scripts/export_viz.py`, rồi mở `viz/index.html` trực tiếp (đã kiểm tra bằng Chrome); hoặc dùng `python viz/serve.py` và `http://localhost:8765` nếu trình duyệt truy cập được localhost. Cần mạng để nạp three.js. File model/data JavaScript tự sinh và checkpoint nằm trong vùng ignored theo quy định repo.
 
 ## Tiến độ và môi trường
 
 Stage 1 hoàn tất: dữ liệu 195.380.179 byte, không thay script tải/clean của đề. Môi trường CPU riêng tại `D:\VIn\.venvs\day12`, Python 3.12.10; NumPy 2.5.4, pandas 3.0.6, matplotlib 3.11.2. Cache logs và dữ liệu nằm trong work/ và data/, không đưa lên Git.
 
-Lệnh chạy từ thư mục repo: `D:\VIn\.venvs\day12\Scripts\python.exe -X utf8 run_all.py --student-id 2A202602763 <bước>`. Split seed=6911, train=6727, test=2883 quỹ đạo; cruise=10 m/s. Kế hoạch 5 seed mô hình: 6377–6381. Stage 1 chưa triển khai TODO hoặc training; các câu còn lại sẽ điền theo evidence ở từng stage.
+Lệnh chạy từ thư mục repo: `D:\VIn\.venvs\day12\Scripts\python.exe -X utf8 run_all.py --student-id 2A202602763 <bước>`. Split seed=6911, train=6727, test=2883 quỹ đạo; cruise=10 m/s. Dùng 5 seed mô hình: 6377–6381. Các stage dưới đây ghi lại phần triển khai và thí nghiệm tiếp theo.
 
 
 Stage 2 hoàn tất: triển khai đủ 10 thân hàm TODO, không thay test, simulator, training loop hoặc ngưỡng gate. `python -m unittest discover -s tests -v` đạt **25/25 tests**, gồm kiểm tra DAgger với nhãn expert, replay tolerance, biên vật lý và MLP. Đối chiếu AST với bộ khung xác nhận chỉ thân 10 hàm được phép thay đổi. Các phép thử bổ sung kiểm tra NaN lệch vị trí, lát cắt phanh rỗng và biên gate đều pass. Test MLP nhỏ ở stage 2 không phải kết quả training để nộp.
@@ -141,4 +165,7 @@ Stage 4 hoàn tất: chạy `run_all.py --student-id 2A202602763 --seeds 5 openl
 Stage 5 hoàn tất: chạy `run_all.py --student-id 2A202602763 --seeds 5 agents`, không quick, CPU, thời gian khoảng 21 s. Hiệu chỉnh xe sau chỉ bằng train, đánh giá cả trễ ego 0 và 0,6 s với 5 seed mô hình đã lưu; ghi evidence/agents.json và câu 6. Stage 6 được ghi nhận dưới đây.
 
 
-Stage 6 hoàn tất: chạy `run_all.py --student-id 2A202602763 --seeds 5 gate fix`, không quick, CPU với BLAS/OMP 1 thread, khoảng **454 s**. Đủ 5 checkpoint percfix, mỗi seed train ban đầu và 2 vòng DAgger; không sửa gate hay evidence bằng tay. Lưu gate/fix chính thức, cập nhật openloop/closedloop/agents bằng script gốc, đánh giá thêm L2 từng seed từ checkpoint bằng Ctx.save. Còn Stage 7: hoàn thiện câu 8, chạy lại toàn pipeline theo yêu cầu nộp, trực quan hóa và kiểm tra submission.
+Stage 6 hoàn tất: chạy `run_all.py --student-id 2A202602763 --seeds 5 gate fix`, không quick, CPU với BLAS/OMP 1 thread, khoảng **454 s**. Đủ 5 checkpoint percfix, mỗi seed train ban đầu và 2 vòng DAgger; không sửa gate hay evidence bằng tay. Lưu gate/fix chính thức, cập nhật openloop/closedloop/agents bằng script gốc, đánh giá thêm L2 từng seed từ checkpoint bằng Ctx.save. Kiểm tra cuối, báo cáo và trực quan hóa được ghi nhận ở Stage 7.
+
+
+Stage 7 hoàn tất: chạy lại toàn pipeline bằng `run_all.py --student-id 2A202602763 --seeds 5`, không quick, CPU, **1.016 s**. Đối chiếu cả 8 file chính với kết quả stage trước giống nhau (bỏ qua thời gian fix); evidence/final_audit.json lưu kiểm tra provenance, split không giao nhau, SHA256 của 15 checkpoint và kiểm tra 29 file gốc chỉ có 10 thân TODO thay đổi. Xuất viewer 5 seed/24 log, kiểm tra Chrome không có page error, lưu ba ảnh và biểu đồ tổng hợp. Báo cáo đủ 8 câu; kiểm tra nộp chính thức được lưu tại evidence/verify.txt. Chưa push ở stage này.

@@ -1,0 +1,60 @@
+{
+  "student": {
+    "student_id": "2A202602763",
+    "split_seed": 6911,
+    "model_seed": 6377,
+    "v_ego": 10
+  },
+  "export": {
+    "seeds": [
+      6377,
+      6378,
+      6379,
+      6380,
+      6381
+    ],
+    "logs": 24,
+    "models": [
+      "ego",
+      "perc",
+      "percfix"
+    ]
+  },
+  "url": "file:///D:/VIn/K4-Track4-VanThanhHuy-2A202602763-Replay-CloseOpenLoop-main/viz/index.html",
+  "note": "Viewer has separate 3D physics; these examples do not replace official 1D metrics.",
+  "page_errors": [],
+  "captures": [
+    {
+      "file": "viz_cutin_perc.png",
+      "planner": "labperc",
+      "scene": "cutin",
+      "v0": 14,
+      "gap": 10,
+      "dv": 11,
+      "rear": "reactive",
+      "seed": 6377,
+      "read": "BÀI LAB · PERCMLP (NHÌN XE DẪN) · SEED 1\nkết quả\nta đâm xe phía trước ở 1,6 s\ncách xe trước, nhỏ nhất\nđâm\nTTC nhỏ nhất\n0,0 s\nphanh mạnh nhất\n7,8 m/s²\ncách xe sau, nhỏ nhất\n6,9 m",
+      "table": "BỘ ĐIỀU KHIỂN\tĐÂM XE TRƯỚC\tXE SAU ĐÂM TA\tCÁCH XE TRƯỚC, NHỎ NHẤT (M)\nIDM\tkhông\tkhông\t2,6\nCV\tcó\tkhông\tđâm\nEgoMLP\t5 / 5 seed\t0 / 5 seed\tđâm … đâm\nPercMLP\t5 / 5 seed\t0 / 5 seed\tđâm … đâm\nPercMLP+\t1 / 5 seed\t0 / 5 seed\tđâm … 2,0"
+    },
+    {
+      "file": "viz_cutin_fixed.png",
+      "planner": "labfix",
+      "scene": "cutin",
+      "v0": 14,
+      "gap": 10,
+      "dv": 11,
+      "rear": "reactive",
+      "seed": 6377,
+      "read": "BÀI LAB · PERCMLP+ (SAU KHI SỬA) · SEED 1\nkết quả\nkhông va chạm\ncách xe trước, nhỏ nhất\n1,9 m\nTTC nhỏ nhất\n0,8 s\nphanh mạnh nhất\n7,8 m/s²\ncách xe sau, nhỏ nhất\n6,3 m",
+      "table": "BỘ ĐIỀU KHIỂN\tĐÂM XE TRƯỚC\tXE SAU ĐÂM TA\tCÁCH XE TRƯỚC, NHỎ NHẤT (M)\nIDM\tkhông\tkhông\t2,6\nCV\tcó\tkhông\tđâm\nEgoMLP\t5 / 5 seed\t0 / 5 seed\tđâm … đâm\nPercMLP\t5 / 5 seed\t0 / 5 seed\tđâm … đâm\nPercMLP+\t1 / 5 seed\t0 / 5 seed\tđâm … 2,0"
+    },
+    {
+      "file": "viz_real_log.png",
+      "scene": "log",
+      "planner": "labfix",
+      "seed": 6377,
+      "log": "#6191 · phanh 4,3 m/s²",
+      "read": "BÀI LAB · PERCMLP+ (SAU KHI SỬA) · SEED 1\nkết quả\nkhông va chạm\ncách xe trước, nhỏ nhất\n7,4 m\nTTC nhỏ nhất\n3,9 s\nphanh mạnh nhất\n1,8 m/s²\ncách xe sau, nhỏ nhất\n11,7 m"
+    }
+  ]
+}

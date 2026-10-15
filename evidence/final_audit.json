@@ -1,0 +1,131 @@
+{
+  "student": {
+    "student_id": "2A202602763",
+    "split_seed": 6911,
+    "model_seed": 6377,
+    "v_ego": 10.0
+  },
+  "command": "run_all.py --student-id 2A202602763 --seeds 5",
+  "quick": false,
+  "seeds": [
+    6377,
+    6378,
+    6379,
+    6380,
+    6381
+  ],
+  "repeat_matches_stage_evidence_except_runtime": {
+    "data_audit": true,
+    "replay": true,
+    "scenarios": true,
+    "openloop": true,
+    "closedloop": true,
+    "agents": true,
+    "gate": true,
+    "fix": true
+  },
+  "source_audit": {
+    "baseline": "origin/main",
+    "baseline_commit": "d7509aa4d16548008e3ffbc75b5299f677315d58",
+    "protected_files_checked": 29,
+    "permitted_todo_bodies": 10,
+    "only_permitted_source_changes": true,
+    "checked_files": [
+      ".gitignore",
+      "GUIDE.md",
+      "README.md",
+      "RUBRIC.md",
+      "evidence/.gitkeep",
+      "lab12/__init__.py",
+      "lab12/agents.py",
+      "lab12/augment.py",
+      "lab12/config.py",
+      "lab12/data.py",
+      "lab12/gate.py",
+      "lab12/models.py",
+      "lab12/planners.py",
+      "lab12/replay.py",
+      "lab12/scenarios.py",
+      "lab12/sim.py",
+      "lab12/stats.py",
+      "lab12/steps.py",
+      "lab12_colab.ipynb",
+      "requirements.txt",
+      "run_all.py",
+      "scripts/check_submission.py",
+      "scripts/export_viz.py",
+      "tests/test_lab12.py",
+      "viz/README.md",
+      "viz/app.js",
+      "viz/index.html",
+      "viz/serve.py",
+      "viz/sim.js"
+    ]
+  },
+  "finite_checkpoints": [
+    {
+      "name": "ego_6377.npz",
+      "sha256": "9d5ad513be330d0e5d09a8a4d0a4d7cf50766c441a3ed0e23d3c8407079da524"
+    },
+    {
+      "name": "ego_6378.npz",
+      "sha256": "987aa17e4280c26a1ecc4b22b9f7a6279049f8c106b6db7ac5387bdf209dc4eb"
+    },
+    {
+      "name": "ego_6379.npz",
+      "sha256": "9cdd6eff68ec30810615a16f1fb7cfd46df642bdaf9219e21936a2d63db0745e"
+    },
+    {
+      "name": "ego_6380.npz",
+      "sha256": "f90f474376887050b376cda9e9830e175a08fb0f30d53cb2d39e173f8b09b1bd"
+    },
+    {
+      "name": "ego_6381.npz",
+      "sha256": "1d1938efe26679c0f74f8ad164df431533d9252f546ab113a46b19b00319363c"
+    },
+    {
+      "name": "perc_6377.npz",
+      "sha256": "acb56dab45ff99a85cf7d02f2f287db39519355fcd13cf99cd5b0bea701e4264"
+    },
+    {
+      "name": "perc_6378.npz",
+      "sha256": "d3319ea3b95b0c1b46a2759c57852c0d9e1d24f868c840242493426c373b49b8"
+    },
+    {
+      "name": "perc_6379.npz",
+      "sha256": "fc8f26a59e7e347ee3eb46393586778475564974078d0cd282a285a9bca02e15"
+    },
+    {
+      "name": "perc_6380.npz",
+      "sha256": "954a70b80322538f0b16e86d1bc1f687e490fb1176693cb12f061d4e01dc1a5a"
+    },
+    {
+      "name": "perc_6381.npz",
+      "sha256": "92a546c75071b5131ecca0500d6d041c1d91d82bb428143d3a2d00859dc1c14d"
+    },
+    {
+      "name": "percfix_6377.npz",
+      "sha256": "ce7982dd315fb801ac1a0919c9ddd1a4452435d6df361aa9121801223b17e43e"
+    },
+    {
+      "name": "percfix_6378.npz",
+      "sha256": "b58ce379d7df06623d75e603794604ee8a06ca15ac33c4b640ad251537fc91ce"
+    },
+    {
+      "name": "percfix_6379.npz",
+      "sha256": "3c3b941db26fff0523ea6daeef58430eecb8698cd6adb85e3a76ac3064ac9a2e"
+    },
+    {
+      "name": "percfix_6380.npz",
+      "sha256": "912d0bcea630bd57dce1f968572b45402ff68477d601aa78bc4e9d9293769339"
+    },
+    {
+      "name": "percfix_6381.npz",
+      "sha256": "6ae90e777995b3c6ed8ee63a380d626d3109cfd72f4c7d89893e90d297a3304b"
+    }
+  ],
+  "train_trajectories": 6727,
+  "test_trajectories": 2883,
+  "train_test_disjoint": true,
+  "all_seven_fixed_gate_rules_pass": true
+}

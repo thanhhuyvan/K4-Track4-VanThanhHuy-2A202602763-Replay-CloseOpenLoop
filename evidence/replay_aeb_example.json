@@ -1,0 +1,39 @@
+{
+  "student": {
+    "student_id": "2A202602763",
+    "split_seed": 6911,
+    "model_seed": 6377,
+    "v_ego": 10.0
+  },
+  "source": "work/replay_log.jsonl, segment 79; actual IDMStream vs IDMStream(aeb_ttc=1.5)",
+  "segment": 79,
+  "frames": [
+    {
+      "frame": 75,
+      "t_s": 7.52,
+      "gap_m": 4.9981,
+      "closing_m_s": 3.3883,
+      "ttc_s": 1.4751055101378272,
+      "old_command": -4.384531531062755,
+      "aeb_command": -6.0
+    },
+    {
+      "frame": 76,
+      "t_s": 7.62,
+      "gap_m": 4.6866,
+      "closing_m_s": 3.2052,
+      "ttc_s": 1.4621864470235868,
+      "old_command": -4.363352099756803,
+      "aeb_command": -6.0
+    },
+    {
+      "frame": 77,
+      "t_s": 7.72,
+      "gap_m": 4.3966,
+      "closing_m_s": 3.0624000000000002,
+      "ttc_s": 1.435671368861024,
+      "old_command": -4.350441035055776,
+      "aeb_command": -6.0
+    }
+  ]
+}
